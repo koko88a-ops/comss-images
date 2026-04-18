@@ -7,15 +7,32 @@ import re
 def fake_visitor_widget():
     import random
     from datetime import datetime
-    today_str = datetime.now().strftime("%Y%m%d")
+    
+    now = datetime.now()
+    current_hour = now.hour
+    current_minute = now.minute
+    
+    # 1. 7분 단위로 시간 축소 (7분 동안은 같은 결과가 나오도록 함)
+    # 0~6분은 0분으로, 7~13분은 7분으로 처리
+    total_min = current_hour * 60 + current_minute
+    stepped_min = (total_min // 7) * 7
+    
+    # 2. 오늘 목표치 생성 (매일 고정)
+    today_str = now.strftime("%Y%m%d")
     random.seed(int(today_str))
     daily_target = random.randint(240, 330)
     
-    now = datetime.now()
-    total_min = now.hour * 60 + now.minute
-    current_v = max(1, int((daily_target * total_min) / 1440))
+    # 3. 오늘 누적 방문수 (7분 주기로만 변동)
+    accumulated_visitors = max(1, int((daily_target * stepped_min) / 1440))
     
-    # 디자이너의 감각을 살린 애니메이션 포함 UI
+    # 4. 실시간 접속 인원 (요청하신 시간대별 랜덤 로직)
+    # 실시간 인원은 새로고침할 때마다 조금씩 변해야 살아있는 느낌이 납니다.
+    if 2 <= current_hour < 8:
+        live_count = random.randint(1, 2)
+    else:
+        live_count = random.randint(1, 5)
+    
+    # 5. 디자인 전공자의 미니멀 UI
     st.markdown(f"""
         <style>
             @keyframes blink {{
@@ -25,36 +42,36 @@ def fake_visitor_widget():
             }}
             .live-dot {{
                 color: #d9534f;
-                font-weight: bold;
                 animation: blink 1.5s infinite;
-                margin-right: 5px;
+                margin-right: 6px;
+                font-weight: bold;
+            }}
+            .visitor-widget {{
+                background-color: #ffffff;
+                border-bottom: 2px solid #1a1a1a;
+                padding: 15px 20px;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                font-family: 'Pretendard', sans-serif;
             }}
         </style>
-        <div style="
-            background-color: #f8f9fa;
-            border-bottom: 2px solid #1a1a1a;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            font-family: 'Pretendard', sans-serif;
-        ">
+        <div class="visitor-widget">
             <div style="font-size: 14px; color: #333; font-weight: 600;">
-                <span class="live-dot">●</span> LIVE <span style="margin-left:5px; color:#666; font-weight:400;">실시간 빌드 상담 현황</span>
+                <span class="live-dot">●</span> <b>LIVE</b> 
+                <span style="margin-left: 5px; color: #555; font-weight: 400;">
+                    현재 <span style="color:#000; font-weight:700;">{live_count}명</span> 상담 검토 중
+                </span>
             </div>
-            <div style="font-size: 18px; font-weight: 800; color: #000;">
-                {current_v} <span style="font-size: 13px; font-weight: 400; color: #777;">명 접속 중</span>
+            <div style="font-size: 13px; color: #888;">
+                오늘 방문 <span style="color: #1a1a1a; font-weight: 800; font-size: 15px;">{accumulated_visitors}</span>
             </div>
         </div>
     """, unsafe_allow_html=True)
 
-# --- 실행 부분 ---
-# GA 스크립트 실행 직후에 배치하세요.
-fake_visitor_widget() 
-
-# 이후 기존 코드(df 로드 및 탭 생성)가 이어집니다.
-# df = load_data()
+# 실행
+fake_visitor_widget()
 # t_gal, t_comp, t_adm = st.tabs([" 맞춤 사양 갤러리", ...])
 
 # --- 1. 환경 설정 및 연결 ---
