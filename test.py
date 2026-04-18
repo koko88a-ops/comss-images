@@ -61,7 +61,7 @@ def fake_visitor_widget():
             <div style="font-size: 14px; color: #333; font-weight: 600;">
                 <span class="live-dot">●</span> <b>LIVE</b> 
                 <span style="margin-left: 5px; color: #555; font-weight: 400;">
-                    현재 <span style="color:#000; font-weight:700;">{live_count}명</span> 상담 검토 중
+                    현재 <span style="color:#000; font-weight:700;">{live_count}명</span> 접속 중 구글애널리틱스
                 </span>
             </div>
             <div style="font-size: 13px; color: #888;">
