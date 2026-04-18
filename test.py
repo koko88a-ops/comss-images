@@ -92,6 +92,44 @@ st.markdown("""
 """, unsafe_allow_html=True)
 conn = st.connection("gsheets", type=GSheetsConnection)
 
+def show_recommendation_popup(df):
+    # 1. 세션 상태 초기화
+    if 'popup_closed' not in st.session_state:
+        st.session_state.popup_closed = False
+    
+    if st.session_state.popup_closed:
+        return
+
+    # 2. 데이터 필터링 (NaN 방어 로직 추가)
+    # 유튜브 URL이 비어있으면 빈 문자열로 채운 뒤 길이를 잽니다.
+    price_mask = (df['현금가'] >= 1000000) & (df['현금가'] <= 2000000)
+    youtube_mask = df['유튜브URL'].fillna('').str.len() > 10
+    target_df = df[price_mask & youtube_mask]
+
+    # [디버깅용] 데이터가 없으면 이유를 출력 (백테스트 완료 후 삭제)
+    if target_df.empty:
+        # st.write("⚠️ 팝업 조건(100~200만, 유튜브 링크 있음)에 맞는 데이터가 시트에 없습니다.")
+        return
+
+    # 3. 제품 랜덤 추출 및 렌더링 (이후 코드는 동일)
+    recomm = target_df.sample(n=1).iloc[0]
+    
+    with st.container(border=True):
+        st.markdown(f"### 💡 오늘의 추천: {recomm['CPU']} + {recomm['GPU']}")
+        st.write(f"가격: {int(recomm['현금가']):,}원")
+        
+        embed = get_embed_url(recomm['유튜브URL'])
+        if embed:
+            st.components.v1.html(f'<iframe width="100%" height="315" src="{embed}" frameborder="0" allowfullscreen style="border-radius:10px;"></iframe>', height=320)
+        
+        c1, c2 = st.columns(2)
+        if c1.button("상세 보기", key="pop_view", use_container_width=True, type="primary"):
+            st.session_state.update({"search_id": str(recomm['ID']), "search_active": True, "popup_closed": True})
+            st.rerun()
+        if c2.button("닫기", key="pop_close", use_container_width=True):
+            st.session_state.popup_closed = True
+            st.rerun()
+
 # --- 🕵️‍♂️ 구글 애널리틱스 CCTV 배선 (새로운 ID로 교체 완료) ---
 ga_id = "G-PBEE9318GB" 
 
