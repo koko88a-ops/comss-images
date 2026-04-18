@@ -4,6 +4,59 @@ import pandas as pd
 from datetime import datetime, timedelta
 import re
 
+def fake_visitor_widget():
+    import random
+    from datetime import datetime
+    today_str = datetime.now().strftime("%Y%m%d")
+    random.seed(int(today_str))
+    daily_target = random.randint(240, 330)
+    
+    now = datetime.now()
+    total_min = now.hour * 60 + now.minute
+    current_v = max(1, int((daily_target * total_min) / 1440))
+    
+    # 디자이너의 감각을 살린 애니메이션 포함 UI
+    st.markdown(f"""
+        <style>
+            @keyframes blink {{
+                0% {{ opacity: 1; }}
+                50% {{ opacity: 0.3; }}
+                100% {{ opacity: 1; }}
+            }}
+            .live-dot {{
+                color: #d9534f;
+                font-weight: bold;
+                animation: blink 1.5s infinite;
+                margin-right: 5px;
+            }}
+        </style>
+        <div style="
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #1a1a1a;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-family: 'Pretendard', sans-serif;
+        ">
+            <div style="font-size: 14px; color: #333; font-weight: 600;">
+                <span class="live-dot">●</span> LIVE <span style="margin-left:5px; color:#666; font-weight:400;">실시간 빌드 상담 현황</span>
+            </div>
+            <div style="font-size: 18px; font-weight: 800; color: #000;">
+                {current_v} <span style="font-size: 13px; font-weight: 400; color: #777;">명 접속 중</span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+# --- 실행 부분 ---
+# GA 스크립트 실행 직후에 배치하세요.
+fake_visitor_widget() 
+
+# 이후 기존 코드(df 로드 및 탭 생성)가 이어집니다.
+# df = load_data()
+# t_gal, t_comp, t_adm = st.tabs([" 맞춤 사양 갤러리", ...])
+
 # --- 1. 환경 설정 및 연결 ---
 st.set_page_config(page_title="컴선생 출고 컴퓨터 갤러리", layout="wide")
 st.markdown("""
